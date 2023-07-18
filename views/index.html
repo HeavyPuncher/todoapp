@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Todo List</title>
+  </head>
+  <body>
+    <h1>Todo List</h1>
+
+    <form id="todoForm">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" required>
+      <br>
+      <label for="comment">Comment:</label>
+      <textarea id="comment" name="comment" required></textarea>
+      <br>
+      <button type="submit">Add Todo</button>
+    </form>
+
+    <h2>Todos:</h2>
+    <ul id="todoList"></ul>
+
+    <script>
+      // Function to fetch all todos from the API and display them
+      async function fetchTodos() {
+        const response = await fetch('/api/todos');
+        const todos = await response.json();
+        const todoList = document.getElementById('todoList');
+        todoList.innerHTML = '';
+        todos.forEach(todo => {
+          const li = document.createElement('li');
+          li.textContent = `Title: ${todo.title}, Comment: ${todo.comment}`;
+          todoList.appendChild(li);
+        });
+      }
+
+      // Function to handle form submission and create a new todo
+      async function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const title = form.elements.title.value;
+        const comment = form.elements.comment.value;
+
+        const response = await fetch('/api/todos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ title, comment })
+        });
+
+        if (response.ok) {
+          form.reset();
+          fetchTodos();
+        }
+      }
+
+      // Attach event listener to form submission
+      const todoForm = document.getElementById('todoForm');
+      todoForm.addEventListener('submit', handleFormSubmit);
+
+      // Initial fetch of todos
+      fetchTodos();
+    </script>
+  </body>
+</html>
